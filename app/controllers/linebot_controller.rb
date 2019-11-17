@@ -23,10 +23,10 @@ class LinebotController < ApplicationController
         when Line::Bot::Event::MessageType::Text
           # event.message['text']：ユーザーから送られたメッセージ
           input = event.message['text']
-          url  = "https://www.drk7.jp/weather/xml/13.xml"
+          url  = "https://www.drk7.jp/weather/xml/23.xml"
           xml  = open( url ).read.toutf8
           doc = REXML::Document.new(xml)
-          xpath = 'weatherforecast/pref/area[4]/'
+          xpath = 'weatherforecast/pref/area[2]/'
           # 当日朝のメッセージの送信の下限値は20％としているが、明日・明後日雨が降るかどうかの下限値は30％としている
           min_per = 30
           case input
@@ -38,10 +38,10 @@ class LinebotController < ApplicationController
             per18to24 = doc.elements[xpath + 'info[2]/rainfallchance/period[4]'].text
             if per06to12.to_i >= min_per || per12to18.to_i >= min_per || per18to24.to_i >= min_per
               push =
-                "明日の天気だよね。\n明日は雨が降りそうだよ(>_<)\n今のところ降水確率はこんな感じだよ。\n　  6〜12時　#{per06to12}％\n　12〜18時　 #{per12to18}％\n　18〜24時　#{per18to24}％\nまた明日の朝の最新の天気予報で雨が降りそうだったら教えるね！"
+                "明日の天気ですね。\n明日は雨が降りそうです。\n現在の降水確率予報はこちらです。\n　  6〜12時　#{per06to12}％\n　12〜18時　 #{per12to18}％\n　18〜24時　#{per18to24}％\nまた明日の朝の最新の天気予報で雨が降りそうだったらお伝えしますね！"
             else
               push =
-                "明日の天気？\n明日は雨が降らない予定だよ(^^)\nまた明日の朝の最新の天気予報で雨が降りそうだったら教えるね！"
+                "明日の天気ですね。\n明日は雨が降らない予報ですよ。\nまた明日の朝の最新の天気予報で雨が降りそうだったらお伝えしますね!"
             end
           when /.*(明後日|あさって).*/
             per06to12 = doc.elements[xpath + 'info[3]/rainfallchance/period[2]l'].text
@@ -49,41 +49,37 @@ class LinebotController < ApplicationController
             per18to24 = doc.elements[xpath + 'info[3]/rainfallchance/period[4]l'].text
             if per06to12.to_i >= min_per || per12to18.to_i >= min_per || per18to24.to_i >= min_per
               push =
-                "明後日の天気だよね。\n何かあるのかな？\n明後日は雨が降りそう…\n当日の朝に雨が降りそうだったら教えるからね！"
+                "明後日の天気ですね。\n何かご予定がありますか？\n明後日は雨が降りそうです…\n当日の朝に雨が降りそうだったらまたお伝えしますね。"
             else
               push =
-                "明後日の天気？\n気が早いねー！何かあるのかな。\n明後日は雨は降らない予定だよ(^^)\nまた当日の朝の最新の天気予報で雨が降りそうだったら教えるからね！"
+                "明後日の天気ですね。\n何かご予定がありますか？\n明後日は雨は降らない予定です!\nまた当日の朝の最新の天気予報で雨が降りそうだったらお伝えしますね！"
             end
           when /.*(かわいい|可愛い|カワイイ|きれい|綺麗|キレイ|素敵|ステキ|すてき|面白い|おもしろい|ありがと|すごい|スゴイ|スゴい|好き|頑張|がんば|ガンバ).*/
             push =
-              "ありがとう！！！\n優しい言葉をかけてくれるあなたはとても素敵です(^^)"
+              "ありがとうございます!!!\n優しい言葉をかけてくれるあなたはとても素敵です!!"
           when /.*(こんにちは|こんばんは|初めまして|はじめまして|おはよう).*/
             push =
-              "こんにちは。\n声をかけてくれてありがとう\n今日があなたにとっていい日になりますように(^^)"
+              "こんにちは。\n声をかけてくれてありがとうございます。\n今日があなたにとっていい日になりますように!"
           else
             per06to12 = doc.elements[xpath + 'info/rainfallchance/period[2]l'].text
             per12to18 = doc.elements[xpath + 'info/rainfallchance/period[3]l'].text
             per18to24 = doc.elements[xpath + 'info/rainfallchance/period[4]l'].text
             if per06to12.to_i >= min_per || per12to18.to_i >= min_per || per18to24.to_i >= min_per
               word =
-                ["雨だけど元気出していこうね！",
-                 "雨に負けずファイト！！",
-                 "雨だけどああたの明るさでみんなを元気にしてあげて(^^)"].sample
+                ["雨だけど元気出していきましょうね！"].sample
               push =
-                "今日の天気？\n今日は雨が降りそうだから傘があった方が安心だよ。\n　  6〜12時　#{per06to12}％\n　12〜18時　 #{per12to18}％\n　18〜24時　#{per18to24}％\n#{word}"
+                "本日の天気ですか？\n本日は雨が降りそうなので傘があった方が安心ですよ。\n　  6〜12時　#{per06to12}％\n　12〜18時　 #{per12to18}％\n　18〜24時　#{per18to24}％\n#{word}"
             else
               word =
-                ["天気もいいから一駅歩いてみるのはどう？(^^)",
-                 "今日会う人のいいところを見つけて是非その人に教えてあげて(^^)",
-                 "素晴らしい一日になりますように(^^)",
-                 "雨が降っちゃったらごめんね(><)"].sample
+                ["素晴らしい一日になりますように!",
+                 "雨が降ってしまったら、申し訳ございません!"].sample
               push =
-                "今日の天気？\n今日は雨は降らなさそうだよ。\n#{word}"
+                "今日の天気？\n今日は雨は降らなさそうですよ! \n#{word}"
             end
           end
           # テキスト以外（画像等）のメッセージが送られた場合
         else
-          push = "テキスト以外はわからないよ〜(；；)"
+          push = "テキスト以外はわかりかねます。"
         end
         message = {
           type: 'text',
