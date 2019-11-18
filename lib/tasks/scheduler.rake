@@ -18,9 +18,6 @@ task :update_feed => :environment do
   # パスの共通部分を変数化（area[4]は「愛知県西部地方」を指定している）
   xpath = 'weatherforecast/pref/area[2]/info/rainfallchance/'
 
-  # 最高気温と最低気温
-  max = doc.elements[xpath + 'range[1]'].text
-  min = doc.elements[xpath + 'range[2]'].text
   # 6時〜12時の降水確率（以下同様）
   per06to12 = doc.elements[xpath + 'period[2]'].text
   per12to18 = doc.elements[xpath + 'period[3]'].text
@@ -44,8 +41,7 @@ task :update_feed => :environment do
     end
     # 発信するメッセージの設定
     push =
-      "#{word1}\n#{word3}\n降水確率はこのような感じです。\n  6〜12時　#{per06to12}％\n　12〜18時　 #{per12to18}％\n　18〜24時　#{per18to24}％\n#{word2}\n
-        最高気温は#{max}°C\n  最低気温は#{min}°Cです!"
+      "#{word1}\n#{word3}\n降水確率はこのような感じです。\n  6〜12時　#{per06to12}％\n　12〜18時　 #{per12to18}％\n　18〜24時　#{per18to24}％\n#{word2}"
     # メッセージの発信先idを配列で渡す必要があるため、userテーブルよりpluck関数を使ってidを配列で取得
     user_ids = User.all.pluck(:line_id)
     message = {
